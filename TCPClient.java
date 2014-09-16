@@ -21,8 +21,7 @@ public class TCPClient {
 			sock = new Socket(serverAddr, SERVER_PORT);
 			
 			// Get a stream for reading messages from server
-			sin = 
-				new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			sin = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 			
 			String message = sin.readLine();
 			System.out.println("Message from server " + serverAddr.getHostName());
