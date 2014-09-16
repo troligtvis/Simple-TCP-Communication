@@ -8,7 +8,6 @@ public class TCPServer {
 	
 	public static final int PORT = 3490;
 	static protected ArrayList<ClientHandler> clientList;
-	static protected Iterator clientIter;
 	
 	public static void main(String[] args) throws IOException {
 		
@@ -95,7 +94,7 @@ class ClientHandler extends Thread {
 		//System.out.println("Client handler " + id + " started."); 
 		if (in != null && out != null) {
 			try {
-				putMessage("Hello! This is Java BroadcastEchoServer. Enter BYE to exit.");
+				putMessage("Hello! Enter BYE to exit.");
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -106,7 +105,7 @@ class ClientHandler extends Thread {
 					if (str == null) {
 						break; 
 					} else {
-						putMessage("Echo: " + str); 
+						//putMessage("Echo: " + str); 
 						System.out.println("Received (" + id + "): " + str);
 
 						if (str.trim().equals("BYE")) {
@@ -115,15 +114,17 @@ class ClientHandler extends Thread {
 							Iterator clientIter = TCPServer.clientList.iterator();
 							while  (clientIter.hasNext()) {
 								ClientHandler t = (ClientHandler) clientIter.next();
-								//if (t != this) {
+								if (t != this) {
 									t.putMessage("Broadcast(" + id + "): " + str); 
-								//}
+								}
 							}
 						}
 					}
 				}
+				
+				// Tar bort klienten ur listan och stänger connection.
+				TCPServer.clientList.remove(this);
 				sock.close(); 
-				//BroadcastEchoServer.activeThreads.removeElement(this); 
 			} catch (IOException e) {} 
 		}
 		System.out.println("Client thread " + id + " stopped."); 
