@@ -12,20 +12,29 @@ public class TCPClient {
 			System.exit(0);
 		}
 		
-		Socket sock = null;
-		BufferedReader sin = null;
-		
+		// Connect to server
+		InetAddress serverAddr = InetAddress.getByName(args[0]);
+		Socket sock = new Socket(serverAddr, SERVER_PORT);
+		BufferedReader inFromUser = null;
+		BufferedReader inFromServer = null;
+		DataOutputStream outToServer = null;
 		try {
-			// Connect to server
-			InetAddress serverAddr = InetAddress.getByName(args[0]);
-			sock = new Socket(serverAddr, SERVER_PORT);
+			
+			
 			
 			// Get a stream for reading messages from server
-			sin = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			for(;;){
+			inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			inFromUser = new BufferedReader(new InputStreamReader(System.in));
+			outToServer = new DataOutputStream(sock.getOutputStream());
+			String message = inFromUser.readLine();
+			outToServer.writeBytes(message);
+			//System.out.println("Message from server " + serverAddr.getHostName());
+			String messageFromServer = inFromServer.readLine();
+			System.out.println(messageFromServer);
 			
-			String message = sin.readLine();
-			System.out.println("Message from server " + serverAddr.getHostName());
-			System.out.println(message);
+			//System.out.println(message);
+			}
 		}
 		// Close socket...
 		finally {

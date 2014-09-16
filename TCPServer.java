@@ -1,10 +1,14 @@
 
 import java.net.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.io.*;
 
 public class TCPServer {
 	
 	public static final int PORT = 3490;
+	static protected ArrayList<ClientHandler> clientList;
+	static protected Iterator clientIter;
 	
 	public static void main(String[] args) throws IOException {
 		
@@ -14,7 +18,11 @@ public class TCPServer {
 		String helpCommand = "/help";
 		String unknownCommand = "unknown command";
 		
+		clientList = new ArrayList<ClientHandler>();
+		
 		ServerSocket servSock = null;
+		
+		int i = 1;
 		
 		try {
 			// Create a server socket, and bind it to a local port
@@ -27,8 +35,13 @@ public class TCPServer {
 				System.out.println("Server contacted from " + 
 												sock.getInetAddress());
 				 // Create a new clienthandler
-				ClientHandler cl = new ClientHandler(sock);
+				System.out.println("Spawning client thread " + i);
+				ClientHandler cl = new ClientHandler(sock, i);
+				clientList.add(cl);
 				cl.start();
+				i++;
+				
+				
 			}
 		}
 		// Close the  server socket...
@@ -46,14 +59,75 @@ class ClientHandler extends Thread {
 	
 	private Socket sock = null;
 	private PrintWriter sout = null; 
+	protected BufferedReader in; 
+	protected PrintWriter out;
+	protected DataOutputStream outToClient;
+	protected int id;
 	
-	ClientHandler(Socket sock) {
+	public ClientHandler(Socket sock, int id) {
 		this.sock = sock;
+		this.id = id;
+		try {
+			if (sock != null) {
+				in = new BufferedReader(new InputStreamReader(sock.getInputStream()));             
+				out = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()), true);             
+			 	}
+		} catch (Exception e) {
+			System.out.println("Error: " + e); 
+		}
+	
 	}
+	
+	public synchronized void putMessage(String msg) throws IOException {
+		if (out != null) {
+			out.println(msg); 
+			//out.flush();
+			
+			//outToClient = new DataOutputStream(sock.getOutputStream());
+			//outToClient.writeBytes(msg);
+		 }
+	}
+	
 	
 	// The thread activity, send a single message and then exit.
 	public void run() {
 		
+		//System.out.println("Client handler " + id + " started."); 
+		if (in != null && out != null) {
+			try {
+				putMessage("Hello! This is Java BroadcastEchoServer. Enter BYE to exit.");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}       
+			try {
+				for (;;) {
+					String str = in.readLine(); 
+					if (str == null) {
+						break; 
+					} else {
+						putMessage("Echo: " + str); 
+						System.out.println("Received (" + id + "): " + str);
+
+						if (str.trim().equals("BYE")) {
+							break; 
+						} else {
+							Iterator clientIter = TCPServer.clientList.iterator();
+							while  (clientIter.hasNext()) {
+								ClientHandler t = (ClientHandler) clientIter.next();
+								//if (t != this) {
+									t.putMessage("Broadcast(" + id + "): " + str); 
+								//}
+							}
+						}
+					}
+				}
+				sock.close(); 
+				//BroadcastEchoServer.activeThreads.removeElement(this); 
+			} catch (IOException e) {} 
+		}
+		System.out.println("Client thread " + id + " stopped."); 
+		/*
 		try {
 			// Get a stream for sending messages to client 
 			// true = auto flush
@@ -69,5 +143,6 @@ class ClientHandler extends Thread {
 				if(sock != null) sock.close();
 			} catch(Exception e) {}
 		}
+		*/
 	}
 }
