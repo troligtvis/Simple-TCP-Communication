@@ -8,6 +8,12 @@ public class TCPServer {
 	
 	public static void main(String[] args) throws IOException {
 		
+		String quitCommand = "/quit";
+		String whoCommand = "/who";
+		String nickCommand = "/nick";
+		String helpCommand = "/help";
+		String unknownCommand = "unknown command";
+		
 		ServerSocket servSock = null;
 		
 		try {
@@ -39,7 +45,7 @@ public class TCPServer {
 class ClientHandler extends Thread {
 	
 	private Socket sock = null;
-	private PrintWriter sout = null;
+	private PrintWriter sout = null; 
 	
 	ClientHandler(Socket sock) {
 		this.sock = sock;
@@ -49,7 +55,6 @@ class ClientHandler extends Thread {
 	public void run() {
 		
 		try {
-			
 			// Get a stream for sending messages to client 
 			// true = auto flush
 			sout = new PrintWriter(sock.getOutputStream(), true);
