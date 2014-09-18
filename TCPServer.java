@@ -141,7 +141,12 @@ class ClientHandler extends Thread {
 							inputCommand=str.split(" ");
 							//Split the str from maincommand and subcommand
 							if(inputCommand[0].equalsIgnoreCase(nickCommand) && !inputCommand[1].isEmpty()){
-								putMessage("Echo: Changed nick from "+users.get(arrayId).getNick()+" to "+inputCommand[1]);
+								
+								Iterator clientIter = TCPServer.clientList.iterator();
+								while  (clientIter.hasNext()) {
+									ClientHandler t = (ClientHandler) clientIter.next();
+									t.putMessage("["+currentTime()+"] Changed nick from "+users.get(arrayId).getNick()+" to "+inputCommand[1]);
+								}
 								users.get(arrayId).setNick(inputCommand[1]); //Changes the name in arraylist object with same id
 								
 							}else if(str.trim().equalsIgnoreCase(whoCommand)){
@@ -150,7 +155,7 @@ class ClientHandler extends Thread {
 									System.out.println(users.get(i).getNick());
 									online+=users.get(i).getNick()+"\n";
 								}
-								putMessage("Echo: Users online:\n"+online);
+								putMessage("Users online:\n"+online);
 							}else if(str.trim().equalsIgnoreCase(helpCommand)){
 								putMessage("Help:\n\n/nick [name] - To change your nick ex. '/nick Jones'\n/who - To show every online user\n/quit - Exit");
 							}else if(str.trim().equalsIgnoreCase(quitCommand)){
@@ -158,7 +163,7 @@ class ClientHandler extends Thread {
 								while  (clientIter.hasNext()) {
 									ClientHandler t = (ClientHandler) clientIter.next();
 									if (t != this) {
-										t.putMessage("Broadcast(" + users.get(arrayId).getNick() + "): Has left the building"); 
+										t.putMessage("["+currentTime()+"] " + users.get(arrayId).getNick() + ": Has left the building"); 
 									} 
 								}
 								users.remove(arrayId);
