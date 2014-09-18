@@ -157,7 +157,7 @@ class ClientHandler extends Thread {
 								}
 								putMessage("Users online:\n"+online);
 							}else if(str.trim().equalsIgnoreCase(helpCommand)){
-								putMessage("Help:\n\n/nick [name] - To change your nick ex. '/nick Jones'\n/who - To show every online user\n/quit - Exit");
+								putMessage("Help:\n\n/nick [name] - To change your nick ex. '/nick Dick'\n/who - To show every online user\n/quit - Exit");
 							}else if(str.trim().equalsIgnoreCase(quitCommand)){
 								Iterator clientIter = TCPServer.clientList.iterator();
 								while  (clientIter.hasNext()) {
