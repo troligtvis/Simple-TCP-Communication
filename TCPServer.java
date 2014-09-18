@@ -50,8 +50,11 @@ public class TCPServer {
 		// Close the  server socket...
 		finally {
 			try {
-				if(servSock != null) servSock.close();
-			} catch(Exception e) {}
+				if(servSock != null) 
+					servSock.close();
+			} catch(Exception e) {
+				
+			}
 		}
 	}
 }
@@ -105,6 +108,15 @@ class ClientHandler extends Thread {
     	return sdf.format(cal.getTime()).toString();
 	}
 	
+	private boolean checkNick(List<User> users, String nick){
+		for(int i=0;i<users.size();i++){
+			if(nick.equalsIgnoreCase(users.get(i).getNick())){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	
 	// The thread activity, send a single message and then exit.
 	public void run() {
@@ -124,7 +136,7 @@ class ClientHandler extends Thread {
 						break; 
 					}else{
 						//putMessage("Echo: " + str); 
-						System.out.println("Received (" + id + "): " + str);
+						//System.out.println("Received (" + id + "): " + str);
 						String[] inputCommand=new String[2];
 						List<User> users=TCPServer.users;
 						
@@ -141,14 +153,16 @@ class ClientHandler extends Thread {
 							inputCommand=str.split(" ");
 							//Split the str from maincommand and subcommand
 							if(inputCommand[0].equalsIgnoreCase(nickCommand) && !inputCommand[1].isEmpty()){
-								
-								Iterator clientIter = TCPServer.clientList.iterator();
-								while  (clientIter.hasNext()) {
-									ClientHandler t = (ClientHandler) clientIter.next();
-									t.putMessage("["+currentTime()+"] Changed nick from "+users.get(arrayId).getNick()+" to "+inputCommand[1]);
+								if(checkNick(users,inputCommand[1])){
+									putMessage("Nick is already in use, choose a different one");
+								}else{
+									Iterator clientIter = TCPServer.clientList.iterator();
+									while  (clientIter.hasNext()) {
+										ClientHandler t = (ClientHandler) clientIter.next();
+										t.putMessage("["+currentTime()+"] Changed nick from "+users.get(arrayId).getNick()+" to "+inputCommand[1]);
+									}
+									users.get(arrayId).setNick(inputCommand[1]); //Changes the name in arraylist object with same id
 								}
-								users.get(arrayId).setNick(inputCommand[1]); //Changes the name in arraylist object with same id
-								
 							}else if(str.trim().equalsIgnoreCase(whoCommand)){
 								String online="";
 								for(int i=0;i<users.size();i++){
@@ -184,10 +198,18 @@ class ClientHandler extends Thread {
 				}
 				
 				//Removes the client from the arraylist and socket
-				TCPServer.clientList.remove(this);
-				sock.close(); 
 				//BroadcastEchoServer.activeThreads.removeElement(this); 
-			} catch (IOException e) {} 
+			} catch (IOException e) {
+				
+			}finally{
+				TCPServer.clientList.remove(this);
+				try {
+					sock.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					System.out.println("Socket cannot close");
+				} 
+			}
 		}
 		System.out.println("Client thread " + id + " stopped."); 
 		/*
