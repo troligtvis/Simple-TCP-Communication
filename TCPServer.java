@@ -110,29 +110,30 @@ class ClientHandler extends Thread {
 			}       
 			try {
 				for (;;) {
-					String str = in.readLine(); 
+					String str = in.readLine();
 					if (str == null) {
 						break; 
-					} else {
+					}else{
 						//putMessage("Echo: " + str); 
 						System.out.println("Received (" + id + "): " + str);
 						String[] inputCommand=new String[2];
 						List<User> users=TCPServer.users;
 						
-						//Får reda på avsändarens id för att kunna broadcasta ens namn till resten + annat
+						//Finds the senders ID so you can get its name etc
 						int arrayId=0;
 						for(int i=0;i<users.size();i++){
 							if(users.get(i).getId()==id){
 								arrayId=i;
 							}
 						}
-						//Kollar om första teckner är /
-						if(str.charAt(0) == '/'){
+						
+						//Checks the first character
+						if(!str.isEmpty() && str.charAt(0) == '/'){
 							inputCommand=str.split(" ");
-							//Delar str från huvudkommandot och namnet
+							//Split the str from maincommand and subcommand
 							if(inputCommand[0].equalsIgnoreCase(nickCommand) && !inputCommand[1].isEmpty()){
 								putMessage("Echo: Changed nick from "+users.get(arrayId).getNick()+" to "+inputCommand[1]);
-								users.get(arrayId).setNick(inputCommand[1]); //Ändrar på namnet i arraylistens objekt med samma id.
+								users.get(arrayId).setNick(inputCommand[1]); //Changes the name in arraylist object with same id
 								
 							}else if(str.trim().equalsIgnoreCase(whoCommand)){
 								String online="";
@@ -168,7 +169,7 @@ class ClientHandler extends Thread {
 					}
 				}
 				
-				// Tar bort klienten ur listan och stÃ¤nger connection
+				//Removes the client from the arraylist and socket
 				TCPServer.clientList.remove(this);
 				sock.close(); 
 				//BroadcastEchoServer.activeThreads.removeElement(this); 
