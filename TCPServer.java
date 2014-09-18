@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class TCPServer {
 	
@@ -96,6 +98,13 @@ class ClientHandler extends Thread {
 		 }
 	}
 	
+	private String currentTime(){
+    	Calendar cal = Calendar.getInstance();
+    	cal.getTime();
+    	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    	return sdf.format(cal.getTime()).toString();
+	}
+	
 	
 	// The thread activity, send a single message and then exit.
 	public void run() {
@@ -162,7 +171,7 @@ class ClientHandler extends Thread {
 							while  (clientIter.hasNext()) {
 								ClientHandler t = (ClientHandler) clientIter.next();
 								if (t != this) {
-									t.putMessage("Broadcast(" + users.get(arrayId).getNick() + "): " + str); 
+									t.putMessage("["+currentTime()+"] " + users.get(arrayId).getNick() + ": " + str); 
 								}
 							}
 						}
